@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Login.LoginController">
+
+    <children>
+      <TabPane fx:id="tabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <tabs>
+            <Tab fx:id="connect" closable="false" text="Connection">
+               <content>
+                    <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="363.0" prefWidth="600.0">
+                        <children>
+                            <Label fx:id="notification" alignment="CENTER" textAlignment="CENTER" textFill="RED" VBox.vgrow="ALWAYS">
+                                <font>
+                                    <Font size="18.0" />
+                                </font>
+                                <VBox.margin>
+                                    <Insets />
+                                </VBox.margin>
+                                <padding>
+                                    <Insets bottom="5.0" />
+                                </padding>
+                            </Label>
+                            <TextField fx:id="usernameField" alignment="CENTER" promptText="Username">
+                                <VBox.margin>
+                                    <Insets bottom="10.0" left="100.0" right="100.0" />
+                                </VBox.margin>
+                            </TextField>
+                            <PasswordField fx:id="passwordField" alignment="CENTER" promptText="Password">
+                                <VBox.margin>
+                                    <Insets bottom="10.0" left="100.0" right="100.0" />
+                                </VBox.margin>
+                            </PasswordField>
+                            <Button fx:id="loginButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#connectDB" prefHeight="31.0" prefWidth="135.0" text="Connect to DB!" textAlignment="CENTER">
+                                <VBox.margin>
+                                    <Insets bottom="15.0" />
+                                </VBox.margin>
+                        </Button>
+                        </children>
+                        <opaqueInsets>
+                            <Insets />
+                        </opaqueInsets>
+                        <padding>
+                            <Insets bottom="5.0" />
+                        </padding>
+                    </VBox>
+               </content>
+            </Tab>
+            <Tab fx:id="analyze" closable="false" disable="true" text="Analysis">
+                 <fx:include fx:id="AnalyzerTab" source="../Analyzer/analyzer.fxml" />
+            </Tab>
+         </tabs>
+      </TabPane>
+    </children>
+</AnchorPane>

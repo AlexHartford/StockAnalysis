@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.131" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Analyzer.AnalyzerController">
+   <children>
+      <VBox alignment="CENTER" layoutX="130.0" layoutY="158.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="errorMsg" textFill="RED">
+               <VBox.margin>
+                  <Insets bottom="10.0" top="10.0" />
+               </VBox.margin>
+            </Label>
+            <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+               <children>
+                  <Label alignment="CENTER" text="Start Date:" />
+                  <TextField fx:id="startDateField" alignment="CENTER" promptText="YYYY-MM-DD" />
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+               <children>
+                  <Label alignment="CENTER" text="End Date:  " />
+                  <TextField fx:id="endDateField" alignment="CENTER" promptText="YYYY-MM-DD" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0" />
+            <Button fx:id="calcButton" mnemonicParsing="false" onAction="#getData" text="Calculate!" />
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" text="Daily Return Standard Deviation:" />
+                        <Label fx:id="dailyStdDevLabel" alignment="CENTER" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" text="Daily Return Average:                 " />
+                        <Label fx:id="dailyAvgLabel" alignment="CENTER" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" text="Sharpe Ratio:                               " />
+                        <Label fx:id="sharpeLabel" alignment="CENTER" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="35.0" prefWidth="600.0" spacing="10.0">
+                     <children>
+                        <Label alignment="CENTER" text="Portfolio Cumulative Return:      " />
+                        <Label fx:id="portfolioLabel" alignment="CENTER" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
