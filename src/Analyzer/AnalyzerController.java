@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * @author Alex Hartford
@@ -30,6 +31,13 @@ public class AnalyzerController {
 
     private double portfolioValue = 1.00;
 
+    private ArrayList<String> stockSymbols;
+    private String CELG = "CELG";
+    private String FB = "FB";
+    private String GOOG = "GOOG";
+    private String NVDA = "NVDA";
+
+    private ArrayList<Double> portfolioAllocations;
     private double CELGweight = 0.3;
     private double FBweight = 0.3;
     private double GOOGweight = 0.2;
@@ -95,10 +103,8 @@ public class AnalyzerController {
         if (!startDateField.getText().isEmpty() && !endDateField.getText().isEmpty()) {
             startDateString = startDateField.getText();
             endDateString = endDateField.getText();
-            System.out.println("Start date string: " + startDateString);
-            System.out.println("End date string: " + endDateString);
         }
-        System.out.println(startDateString.matches(pattern) + " " + endDateString.matches(pattern));
+
         if (startDateString.matches(pattern) && endDateString.matches(pattern)) {
             java.util.Date utilStartDate = null;
             java.util.Date utilEndDate = null;
@@ -110,22 +116,47 @@ public class AnalyzerController {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            System.out.println(startDate);
-            System.out.println(endDate);
             return true;
         }
-
         return false;
     }
 
     /**
-     * Any overhead that needs to be initialized, such as constraints on textfields.
+     * Calculates the value for each stock and updates the portfolio accordingly.
+     */
+    private void calculateStockValues() {
+        if (parseDates()) {
+            for (int i = 0; i < stockSymbols.size(); i++) {
+                String updateQuery = "UPDATE portfolio SET "
+                        + stockSymbols.get(i) + "value = "
+                        + portfolioAllocations.get(i) + " * " + portfolioValue + " * " + stockSymbols.get(i) + "cumulativeReturn"
+                        + " WHERE Date >= '" + startDate + "' AND Date <= '" + endDate + "'";
+                Statement statement = null;
+                try {
+                    statement = connection.createStatement();
+                    statement.executeUpdate(updateQuery);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Any overhead that needs to be initialized.
      */
     private void setUp() {
-        dailyStdDevLabel.setText("12345");
-        dailyAvgLabel.setText("54321");
-        sharpeLabel.setText("09876");
-        portfolioLabel.setText("67890");
+        stockSymbols = new ArrayList<>();
+        stockSymbols.add(CELG);
+        stockSymbols.add(FB);
+        stockSymbols.add(GOOG);
+        stockSymbols.add(NVDA);
+
+        portfolioAllocations = new ArrayList<>();
+        portfolioAllocations.add(CELGweight);
+        portfolioAllocations.add(FBweight);
+        portfolioAllocations.add(GOOGweight);
+        portfolioAllocations.add(NVDAweight);
     }
 
     /**
