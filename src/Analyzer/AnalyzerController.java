@@ -64,11 +64,13 @@ public class AnalyzerController {
     @FXML
     private void getData() {
 
-        calculateStockValues();
+        calculateStockValues(portfolioAllocations);
         calculatePortfolioValue();
         calculatePortfolioReturn();
-        sharpen();
-
+//        sharpen();
+        sharpest();
+        double cumulativeReturn = calculateCumulativeReturn();
+        portfolioLabel.setText(String.valueOf(cumulativeReturn));
     }
 
     /**
@@ -111,7 +113,7 @@ public class AnalyzerController {
      * Only need to run this once each time you adjust your portfolio.
      * TODO: Add radio button or toggle switch to GUI
      */
-    private void calculateStockValues() {
+    private void calculateStockValues(ArrayList<Double> portfolioAllocations) {
         if (parseDates() && stockValuesNeedCalculating) {
             for (int i = 0; i < stockSymbols.size(); i++) {
                 String updateQuery = "UPDATE portfolio SET "
@@ -172,6 +174,7 @@ public class AnalyzerController {
                     sum += Math.pow(Math.abs((results.getFloat("PortfolioCumulativeReturn") - results.getFloat("SPYcumulativeReturn")) - average), 2);
                 }
                 standardDeviation = Math.sqrt(sum / numRows);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -182,13 +185,85 @@ public class AnalyzerController {
     /**
      * Calculate the Sharpe ratio
      */
-    private void sharpen() {
-        double average = calculateAverage();
-        double standardDeviation = calculateStandardDeviation(average);
+    private double sharpen(double average, double standardDeviation) {
+//        double average = calculateAverage();
+//        double standardDeviation = calculateStandardDeviation(average);
         double sharpe = Math.sqrt(numRows) * average / standardDeviation;
+//        double cumulativeReturn = calculateCumulativeReturn();
         sharpeLabel.setText(String.valueOf(sharpe));
         dailyAvgLabel.setText(String.valueOf(average));
         dailyStdDevLabel.setText(String.valueOf(standardDeviation));
+        return sharpe;
+    }
+
+    private double magic(ArrayList<Double> allocations) {
+
+        calculateStockValues(allocations);
+        calculatePortfolioValue();
+        calculatePortfolioReturn();
+        double average = calculateAverage();
+        double standardDeviation = calculateStandardDeviation(average);
+        return sharpen(average, standardDeviation);
+    }
+
+    private void sharpest() {
+        double sharpestRatio = 0;
+        ArrayList<Double> allocations = new ArrayList<>();
+        ArrayList<Double> bestAllocations = new ArrayList<>();
+
+        for (int i = 0; i <= 10; i += 1) {
+            for (int j = 0; j <= 10; j += 1) {
+                for (int k = 0; k <= 10; k += 1) {
+                    for (int l = 0; l <= 10; l += 1) {
+                        if (i + j + k + l == 10) {
+//                            System.out.println(i / 10.0 + " " + j / 10.0 + " " + k / 10.0 + " " + l / 10.0);
+                            allocations.clear();
+                            allocations.add(i / 10.0);
+                            allocations.add(j / 10.0);
+                            allocations.add(k / 10.0);
+                            allocations.add(l / 10.0);
+                            double sharpe = magic(allocations);
+                            if (sharpe > sharpestRatio) {
+                                sharpestRatio = sharpe;
+                                bestAllocations.clear();
+                                bestAllocations.addAll(allocations);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("THE SHARPEST RATIO IS!!!!! " + sharpestRatio);
+        for (double d : bestAllocations) {
+            System.out.print(d + " ");
+        }
+    }
+
+    private double calculateCumulativeReturn() {
+        double cumulativeReturn = 0;
+
+        if (parseDates()) {
+
+            ResultSet results = null;
+            Statement statement = null;
+            String query = "select * from portfolio WHERE Date = '2016-10-06' OR Date = '2017-10-03'";
+            try {
+                statement = connection.createStatement();
+                results = statement.executeQuery(query);
+                ResultSetMetaData resultSetMetaData = (ResultSetMetaData) results
+                        .getMetaData();
+                results.next();
+                double first = results.getFloat("PortfolioValue");
+                results.next();
+                double last = results.getFloat("PortfolioValue");
+
+                cumulativeReturn = (last - first) / first;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return cumulativeReturn;
     }
 
     /**
@@ -215,7 +290,6 @@ public class AnalyzerController {
 
     /**
      * Calculates the portfolio's return by day
-     * Only need to run this once each time you adjust your portfolio.
      * TODO: Add radio button or toggle switch to GUI
      */
     private void calculatePortfolioReturn() {
@@ -233,6 +307,7 @@ public class AnalyzerController {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**
@@ -251,9 +326,9 @@ public class AnalyzerController {
         portfolioAllocations.add(GOOGweight);
         portfolioAllocations.add(NVDAweight);
 
-        stockValuesNeedCalculating = false;
-        portfolioValueNeedsCalculating = false;
-        portfolioReturnNeedsCalculating = false;
+        stockValuesNeedCalculating = true;
+        portfolioValueNeedsCalculating = true;
+        portfolioReturnNeedsCalculating = true;
         spyValueNeedsCalculating = false;
 
         if (spyValueNeedsCalculating) {
