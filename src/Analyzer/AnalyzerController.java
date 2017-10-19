@@ -1,9 +1,12 @@
 package Analyzer;
 
 import Login.LoginController;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 
 import java.sql.*;
@@ -16,6 +19,10 @@ import java.util.ArrayList;
  */
 public class AnalyzerController {
 
+    @FXML private ProgressBar progBar;
+    @FXML private Label optimizedSharpeLabel;
+    @FXML private Label optimizedStockWeightLabel;
+    @FXML private Label optimizedCumReturnLabel;
     @FXML private Label errorMsg;
     @FXML private TextField endDateField;
     @FXML private TextField startDateField;
@@ -24,6 +31,8 @@ public class AnalyzerController {
     @FXML private Label dailyAvgLabel;
     @FXML private Label sharpeLabel;
     @FXML private Label portfolioLabel;
+
+    final SimpleDoubleProperty prop = new SimpleDoubleProperty(0);
 
     private static Connection connection;
 
@@ -67,9 +76,18 @@ public class AnalyzerController {
         calculateStockValues(portfolioAllocations);
         calculatePortfolioValue();
         calculatePortfolioReturn();
-//        sharpen();
-        sharpest();
+        double average = calculateAverage();
+        double standardDeviation = calculateStandardDeviation(average);
+        double sharpe = sharpen(average, standardDeviation);
+        Runnable r = this::sharpest;
+        Thread t = new Thread(r);
+        progBar.setVisible(true);
+//        Platform.runLater(t);
+        t.start();
         double cumulativeReturn = calculateCumulativeReturn();
+        sharpeLabel.setText(String.valueOf(sharpe));
+        dailyAvgLabel.setText(String.valueOf(average));
+        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
         portfolioLabel.setText(String.valueOf(cumulativeReturn));
     }
 
@@ -186,17 +204,11 @@ public class AnalyzerController {
      * Calculate the Sharpe ratio
      */
     private double sharpen(double average, double standardDeviation) {
-//        double average = calculateAverage();
-//        double standardDeviation = calculateStandardDeviation(average);
-        double sharpe = Math.sqrt(numRows) * average / standardDeviation;
-//        double cumulativeReturn = calculateCumulativeReturn();
-        sharpeLabel.setText(String.valueOf(sharpe));
-        dailyAvgLabel.setText(String.valueOf(average));
-        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
-        return sharpe;
+
+        return Math.sqrt(numRows) * average / standardDeviation;
     }
 
-    private double magic(ArrayList<Double> allocations) {
+    private double optimize(ArrayList<Double> allocations) {
 
         calculateStockValues(allocations);
         calculatePortfolioValue();
@@ -207,36 +219,56 @@ public class AnalyzerController {
     }
 
     private void sharpest() {
+
         double sharpestRatio = 0;
+        double optimizedReturn = 0;
         ArrayList<Double> allocations = new ArrayList<>();
         ArrayList<Double> bestAllocations = new ArrayList<>();
+        double prog = 0;
 
-        for (int i = 0; i <= 10; i += 1) {
-            for (int j = 0; j <= 10; j += 1) {
-                for (int k = 0; k <= 10; k += 1) {
-                    for (int l = 0; l <= 10; l += 1) {
+        for (int i = 0; i <= 10; i++) {
+            for (int j = 0; j <= 10; j++) {
+                for (int k = 0; k <= 10; k++) {
+                    for (int l = 0; l <= 10; l++) {
+
                         if (i + j + k + l == 10) {
-//                            System.out.println(i / 10.0 + " " + j / 10.0 + " " + k / 10.0 + " " + l / 10.0);
+                            prop.set(prog++/286);
                             allocations.clear();
                             allocations.add(i / 10.0);
                             allocations.add(j / 10.0);
                             allocations.add(k / 10.0);
                             allocations.add(l / 10.0);
-                            double sharpe = magic(allocations);
+                            double sharpe = optimize(allocations);
                             if (sharpe > sharpestRatio) {
                                 sharpestRatio = sharpe;
                                 bestAllocations.clear();
                                 bestAllocations.addAll(allocations);
+                                optimizedReturn = calculateCumulativeReturn();
                             }
                         }
                     }
                 }
             }
         }
-        System.out.println("THE SHARPEST RATIO IS!!!!! " + sharpestRatio);
-        for (double d : bestAllocations) {
-            System.out.print(d + " ");
-        }
+        double finalOptimizedReturn = optimizedReturn;
+        double finalSharpestRatio = sharpestRatio;
+        Platform.runLater(() -> {
+
+            optimizedSharpeLabel.setText(String.valueOf(finalSharpestRatio));
+
+            StringBuilder weight = new StringBuilder();
+            weight.append("[ ");
+            for (double d : bestAllocations) {
+                weight.append(d).append(" ");
+            }
+            weight.append("]");
+            optimizedStockWeightLabel.setText(String.valueOf(weight.toString()));
+            optimizedCumReturnLabel.setText(String.valueOf(finalOptimizedReturn));
+        });
+    }
+
+    private void indicateProgress(double prog) {
+        progBar.setProgress(prog);
     }
 
     private double calculateCumulativeReturn() {
@@ -336,6 +368,8 @@ public class AnalyzerController {
             portfolioAllocations.add(SPYweight);
         }
 
+        progBar.setVisible(false);
+        progBar.progressProperty().bind(prop);
     }
 
     /**
