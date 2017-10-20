@@ -1,6 +1,7 @@
 package Analyzer;
 
 import Login.LoginController;
+import Plots.PlotsController;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
@@ -73,22 +74,23 @@ public class AnalyzerController {
     @FXML
     private void getData() {
 
-        calculateStockValues(portfolioAllocations);
-        calculatePortfolioValue();
-        calculatePortfolioReturn();
-        double average = calculateAverage();
-        double standardDeviation = calculateStandardDeviation(average);
-        double sharpe = sharpen(average, standardDeviation);
-        Runnable r = this::sharpest;
-        Thread t = new Thread(r);
-        progBar.setVisible(true);
-//        Platform.runLater(t);
-        t.start();
-        double cumulativeReturn = calculateCumulativeReturn();
-        sharpeLabel.setText(String.valueOf(sharpe));
-        dailyAvgLabel.setText(String.valueOf(average));
-        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
-        portfolioLabel.setText(String.valueOf(cumulativeReturn));
+//        calculateStockValues(portfolioAllocations);
+//        calculatePortfolioValue();
+//        calculatePortfolioReturn();
+//        double average = calculateAverage();
+//        double standardDeviation = calculateStandardDeviation(average);
+//        double sharpe = sharpen(average, standardDeviation);
+////        Runnable r = this::sharpest;
+////        Thread t = new Thread(r);
+////        progBar.setVisible(true);
+////        t.start();
+//        sharpest();
+        setUpPlots();
+//        double cumulativeReturn = calculateCumulativeReturn();
+//        sharpeLabel.setText(String.valueOf(sharpe));
+//        dailyAvgLabel.setText(String.valueOf(average));
+//        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
+//        portfolioLabel.setText(String.valueOf(cumulativeReturn));
     }
 
     /**
@@ -370,6 +372,44 @@ public class AnalyzerController {
 
         progBar.setVisible(false);
         progBar.progressProperty().bind(prop);
+    }
+
+    private void setUpPlots() {
+        stockSymbols.add(SPY);
+
+        ArrayList<Double> CELGlist = new ArrayList<>();
+        ArrayList<Double> FBlist = new ArrayList<>();
+        ArrayList<Double> GOOGlist = new ArrayList<>();
+        ArrayList<Double> NVDAlist = new ArrayList<>();
+        ArrayList<Double> SPYlist = new ArrayList<>();
+
+        ResultSet results = null;
+        Statement statement = null;
+        String query = "select * from portfolio";
+        try {
+            statement = connection.createStatement();
+            results = statement.executeQuery(query);
+            ResultSetMetaData resultSetMetaData = (ResultSetMetaData) results
+                    .getMetaData();
+
+            while (results.next()) {
+                CELGlist.add(results.getDouble("CELGcumulativeReturn"));
+                FBlist.add(results.getDouble("FBcumulativeReturn"));
+                GOOGlist.add(results.getDouble("GOOGcumulativeReturn"));
+                NVDAlist.add(results.getDouble("NVDAcumulativeReturn"));
+                SPYlist.add(results.getDouble("SPYcumulativeReturn"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ArrayList<ArrayList<Double>> returnList = new ArrayList<>();
+        returnList.add(CELGlist);
+        returnList.add(FBlist);
+        returnList.add(GOOGlist);
+        returnList.add(NVDAlist);
+        returnList.add(SPYlist);
+
+        PlotsController.drawPlots(returnList, stockSymbols);
     }
 
     /**

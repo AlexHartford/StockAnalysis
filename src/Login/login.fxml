@@ -59,6 +59,11 @@
             <Tab fx:id="analyze" closable="false" disable="true" text="Analysis">
                  <fx:include fx:id="AnalyzerTab" source="../Analyzer/analyzer.fxml" />
             </Tab>
+            <Tab fx:id="plots" closable="false" disable="false" text="Plots">
+               <content>
+                  <fx:include fx:id="PlotsTab" source="../Plots/plots.fxml" />
+               </content>
+            </Tab>
          </tabs>
       </TabPane>
     </children>

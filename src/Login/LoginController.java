@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 public class LoginController {
 
+    @FXML private Tab plots;
     @FXML private TabPane tabPane;
     @FXML private Tab analyze;
     @FXML private Tab connect;
