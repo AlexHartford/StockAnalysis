@@ -73,24 +73,22 @@ public class AnalyzerController {
      */
     @FXML
     private void getData() {
-
-//        calculateStockValues(portfolioAllocations);
-//        calculatePortfolioValue();
-//        calculatePortfolioReturn();
-//        double average = calculateAverage();
-//        double standardDeviation = calculateStandardDeviation(average);
-//        double sharpe = sharpen(average, standardDeviation);
-////        Runnable r = this::sharpest;
-////        Thread t = new Thread(r);
-////        progBar.setVisible(true);
-////        t.start();
-//        sharpest();
         setUpPlots();
-//        double cumulativeReturn = calculateCumulativeReturn();
-//        sharpeLabel.setText(String.valueOf(sharpe));
-//        dailyAvgLabel.setText(String.valueOf(average));
-//        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
-//        portfolioLabel.setText(String.valueOf(cumulativeReturn));
+        calculateStockValues(portfolioAllocations);
+        calculatePortfolioValue();
+        calculatePortfolioReturn();
+        double average = calculateAverage();
+        double standardDeviation = calculateStandardDeviation(average);
+        double sharpe = sharpen(average, standardDeviation);
+        Runnable r = this::sharpest;
+        Thread t = new Thread(r);
+        progBar.setVisible(true);
+        t.start();
+        double cumulativeReturn = calculateCumulativeReturn();
+        sharpeLabel.setText(String.valueOf(sharpe));
+        dailyAvgLabel.setText(String.valueOf(average));
+        dailyStdDevLabel.setText(String.valueOf(standardDeviation));
+        portfolioLabel.setText(String.valueOf(cumulativeReturn));
     }
 
     /**
@@ -135,7 +133,7 @@ public class AnalyzerController {
      */
     private void calculateStockValues(ArrayList<Double> portfolioAllocations) {
         if (parseDates() && stockValuesNeedCalculating) {
-            for (int i = 0; i < stockSymbols.size(); i++) {
+            for (int i = 0; i < stockSymbols.size() - 1; i++) {
                 String updateQuery = "UPDATE portfolio SET "
                         + stockSymbols.get(i) + "value = "
                         + portfolioAllocations.get(i) + " * " + portfolioValue + " * " + stockSymbols.get(i) + "cumulativeReturn"
